@@ -11,6 +11,8 @@ const colorSelect = document.getElementById('color');
 // Activities Selectors
 const activities = document.querySelectorAll('.activities input');
 
+var totalCost = 0;
+
 nameInput.focus();
 
 titleInput.addEventListener("input", e => {
@@ -53,49 +55,54 @@ showColorData(0);
 function showColorData(state) {
     // 0 = hide, 1 = JsPuns, 2 = iLovePuns
     optionsLength = colorSelect.options.length ; 
-    if (state == 2) {
-        for (let i = optionsLength; i >= 0; i--) {
-            colorSelect.options.remove(optionsLength);
-            optionsLength -= 1;
-        }
-        for (let i = 0; i < themes.iLovePuns.length; i++) {
-            elementProps = {
-                element: 'option',
-                content: themes.iLovePuns[i].text,
-                attr: [
-                    {key: 'value', value: themes.iLovePuns[i].value}
-                ]
+
+    switch (state) {
+        case 2:
+            for (let i = optionsLength; i >= 0; i--) {
+                colorSelect.options.remove(optionsLength);
+                optionsLength -= 1;
             }
-            const element = createElement(elementProps);
-            colorSelect.appendChild(element);
-        }
-    } else if (state == 1) {
-        for (let i = optionsLength; i >= 0; i--) {
-            colorSelect.options.remove(optionsLength);
-            optionsLength -= 1;
-        }
-        for (let i = 0; i < themes.jsPuns.length; i++) {
-            elementProps = {
-                element: 'option',
-                content: themes.jsPuns[i].text,
-                attr: [
-                    {key: 'value', value: themes.jsPuns[i].value}
-                ]
+            for (let i = 0; i < themes.iLovePuns.length; i++) {
+                elementProps = {
+                    element: 'option',
+                    content: themes.iLovePuns[i].text,
+                    attr: [
+                        {key: 'value', value: themes.iLovePuns[i].value}
+                    ]
+                }
+                const element = createElement(elementProps);
+                colorSelect.appendChild(element);
+            }            
+            break;
+        case 1:
+            for (let i = optionsLength; i >= 0; i--) {
+                colorSelect.options.remove(optionsLength);
+                optionsLength -= 1;
             }
-            const element = createElement(elementProps);
-            colorSelect.appendChild(element);
-        }
-    } else if (state == 0) {
-        for (let i = optionsLength; i >= 0; i--) {
-            colorSelect.options.remove(optionsLength);
-            optionsLength -= 1;
-        }
-    
-        if (designSelect.selectedIndex === 0) {
-            const colorDefault = document.createElement('option');
-            colorDefault.text = 'Please select a T-shirt theme';
-            colorSelect.appendChild(colorDefault);
-        }
+            for (let i = 0; i < themes.jsPuns.length; i++) {
+                elementProps = {
+                    element: 'option',
+                    content: themes.jsPuns[i].text,
+                    attr: [
+                        {key: 'value', value: themes.jsPuns[i].value}
+                    ]
+                }
+                const element = createElement(elementProps);
+                colorSelect.appendChild(element);
+            }
+            break;
+        default:
+            for (let i = optionsLength; i >= 0; i--) {
+                colorSelect.options.remove(optionsLength);
+                optionsLength -= 1;
+            }
+        
+            if (designSelect.selectedIndex === 0) {
+                const colorDefault = document.createElement('option');
+                colorDefault.text = 'Please select a T-shirt theme';
+                colorSelect.appendChild(colorDefault);
+            }
+            break;
     }
 }
 
@@ -112,14 +119,17 @@ designSelect.addEventListener("input", e => {
 
 
 activitiesList = [];
-for (i = 0; i < activities.length; i++) {
-    const dataCost = activities[i].getAttribute('data-cost');
-    const name = activities[i].getAttribute('name');
-    const date = activities[i].getAttribute('data-day-and-time');
-    activitiesList[i] = {dataCost: dataCost, name: name, date: date}
+indexActivities();
+function indexActivities() {
+    for (i = 0; i < activities.length; i++) {
+        const dataCost = activities[i].getAttribute('data-cost');
+        const name = activities[i].getAttribute('name');
+        const date = activities[i].getAttribute('data-day-and-time');
+        activitiesList[i] = {dataCost: dataCost, name: name, date: date};
+    }
 }
 
-// Add an event listener to each input and add the function checkAvailability
+// Add an event listener to each input and adds the function checkAvailability
 activities.forEach(activities => activities.addEventListener("input", e => {checkAvailability(e);}));
 
 function checkAvailability(event) {
@@ -127,32 +137,46 @@ function checkAvailability(event) {
     const name = event.target.getAttribute('name');
     const date = event.target.getAttribute('data-day-and-time');
 
-    console.log(`target date ${date}`);
+    showTotal();
+    updateActivities(event.target.checked);
 
-    if (totalCost <= 0) {
+    function showTotal() {
+        totalCost = 0;
         const parent = activities[0].parentNode.parentNode;
-        totalCost += +dataCost;
-        const total = createElement({element: 'div', content: `Total: $${totalCost}`, attr: [{key: 'id', value: 'totalCost'}]});
-        parent.appendChild(total);
-    } else {
-        const total = document.getElementById('totalCost');
-        totalCost += +dataCost;
-        total.innerText = `Total: $${totalCost}`;
-    }
-
-    for (let i = 0; i < activitiesList.length; i++) {
-
-        if (date.indexOf(activitiesList[i].date) > -1) {
-            console.log(`list date: ${activitiesList[i].date}`);
-            activitiesList.splice(date, 1);
+        const child = document.getElementById('totalCost');
+        if (document.getElementById('totalCost')) {
+            parent.removeChild(child);
         }
-        
-    }
-}
+        for (let i = 0; i < activities.length; i++) {
+            if(activities[i].checked) {
+                totalCost += +activities[i].getAttribute('data-cost');
+            }
+        }
 
-var totalCost = 0;
-function totalCalculator(cost) {
-    return totalCost = totalCost + cost;
+        if (totalCost > 0) {
+            const total = createElement({element: 'div', content: `Total: $${totalCost}`, attr: [{key: 'id', value: 'totalCost'}]});
+            parent.appendChild(total);
+        }
+
+    }
+
+    function updateActivities(checked) {
+        if (date) {
+            for (let i = 0; i < activitiesList.length; i++) {
+                if (date.indexOf(activitiesList[i].date) > -1 && name != activitiesList[i].name) {
+                    const elementToHide = document.getElementsByName(activitiesList[i].name)[0];
+                    if (checked) {
+                        elementToHide.setAttribute('disabled', true);
+                    } else {
+                        elementToHide.removeAttribute('disabled');
+                    }
+                }
+            }
+        }
+
+
+    }
+
 }
 
 function createElement(element) {
