@@ -11,6 +11,7 @@ const colorSelect = document.getElementById('color');
 // Activities Selectors
 const activities = document.querySelectorAll('.activities input');
 
+
 var totalCost = 0;
 
 nameInput.focus();
@@ -20,9 +21,9 @@ titleInput.addEventListener("input", e => {
 
         const otherElement = {
             element: 'input',
-            attr:[
-                {key:'id', value: 'other-title'},
-                {key: 'placeholder', value: 'Your Job Role'}
+            attr: [
+                { key: 'id', value: 'other-title' },
+                { key: 'placeholder', value: 'Your Job Role' }
             ]
         };
 
@@ -40,8 +41,8 @@ var themes = {
 };
 for (let i = 0; i < (colorSelect.options.length); i++) {
     var colorOption = colorSelect[i];
-    const color = {value: colorOption.value, text: colorOption.text};
-    if(colorOption.text.toUpperCase().indexOf('JS Puns'.toUpperCase()) > -1) {
+    const color = { value: colorOption.value, text: colorOption.text };
+    if (colorOption.text.toUpperCase().indexOf('JS Puns'.toUpperCase()) > -1) {
         themes.jsPuns.push(color);
     } else {
         themes.iLovePuns.push(color);
@@ -54,7 +55,7 @@ showColorData(0);
 // This function will show or hide de Color options based on the param
 function showColorData(state) {
     // 0 = hide, 1 = JsPuns, 2 = iLovePuns
-    optionsLength = colorSelect.options.length ; 
+    optionsLength = colorSelect.options.length;
 
     switch (state) {
         case 2:
@@ -67,12 +68,12 @@ function showColorData(state) {
                     element: 'option',
                     content: themes.iLovePuns[i].text,
                     attr: [
-                        {key: 'value', value: themes.iLovePuns[i].value}
+                        { key: 'value', value: themes.iLovePuns[i].value }
                     ]
                 }
                 const element = createElement(elementProps);
                 colorSelect.appendChild(element);
-            }            
+            }
             break;
         case 1:
             for (let i = optionsLength; i >= 0; i--) {
@@ -84,7 +85,7 @@ function showColorData(state) {
                     element: 'option',
                     content: themes.jsPuns[i].text,
                     attr: [
-                        {key: 'value', value: themes.jsPuns[i].value}
+                        { key: 'value', value: themes.jsPuns[i].value }
                     ]
                 }
                 const element = createElement(elementProps);
@@ -96,7 +97,7 @@ function showColorData(state) {
                 colorSelect.options.remove(optionsLength);
                 optionsLength -= 1;
             }
-        
+
             if (designSelect.selectedIndex === 0) {
                 const colorDefault = document.createElement('option');
                 colorDefault.text = 'Please select a T-shirt theme';
@@ -114,7 +115,7 @@ designSelect.addEventListener("input", e => {
         showColorData(1);
     } else if (e.target.value === designSelect.options[2].value) {
         showColorData(2);
-    } 
+    }
 });
 
 
@@ -125,12 +126,12 @@ function indexActivities() {
         const dataCost = activities[i].getAttribute('data-cost');
         const name = activities[i].getAttribute('name');
         const date = activities[i].getAttribute('data-day-and-time');
-        activitiesList[i] = {dataCost: dataCost, name: name, date: date};
+        activitiesList[i] = { dataCost: dataCost, name: name, date: date };
     }
 }
 
 // Add an event listener to each input and adds the function checkAvailability
-activities.forEach(activities => activities.addEventListener("input", e => {checkAvailability(e);}));
+activities.forEach(activities => activities.addEventListener("input", e => { checkAvailability(e); }));
 
 function checkAvailability(event) {
     const dataCost = +event.target.getAttribute('data-cost');
@@ -148,13 +149,13 @@ function checkAvailability(event) {
             parent.removeChild(child);
         }
         for (let i = 0; i < activities.length; i++) {
-            if(activities[i].checked) {
+            if (activities[i].checked) {
                 totalCost += +activities[i].getAttribute('data-cost');
             }
         }
 
         if (totalCost > 0) {
-            const total = createElement({element: 'div', content: `Total: $${totalCost}`, attr: [{key: 'id', value: 'totalCost'}]});
+            const total = createElement({ element: 'div', content: `Total: $${totalCost}`, attr: [{ key: 'id', value: 'totalCost' }] });
             parent.appendChild(total);
         }
 
@@ -179,6 +180,44 @@ function checkAvailability(event) {
 
 }
 
+
+// NEED REFACTORING
+const paymentSelect = document.getElementById('payment');
+paymentSelect[0].setAttribute('disabled',true);
+const creditCardDiv = paymentSelect.nextElementSibling;
+creditCardDiv.remove();
+const paypalDiv = paymentSelect.nextElementSibling;
+paypalDiv.remove();
+const bitcoinDiv = paymentSelect.nextElementSibling;
+bitcoinDiv.remove();
+
+paymentSelect.value = 'credit card';
+paymentSelect.parentNode.append(creditCardDiv);
+
+
+paymentSelect.addEventListener("input", e => {
+
+    creditCardDiv.remove();
+    paypalDiv.remove();
+    bitcoinDiv.remove();
+
+    switch (e.target.value) {
+        case 'credit card':
+            paymentSelect.parentNode.append(creditCardDiv);
+            break
+        case 'paypal':
+            paymentSelect.parentNode.append(paypalDiv);
+            break;
+        case 'bitcoin':
+            paymentSelect.parentNode.append(bitcoinDiv);
+            break;
+        default:
+            break;
+
+    }
+});
+
+
 function createElement(element) {
     const ele = document.createElement(element.element);
     if (element.attr) {
@@ -187,7 +226,7 @@ function createElement(element) {
         }
     }
     if (element.content) {
-       ele.textContent = element.content;
+        ele.textContent = element.content;
     }
     return ele;
 }
