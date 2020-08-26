@@ -22,9 +22,9 @@ const submitButton = document.querySelector("button[type='submit']");
 
 // Regular Expressions
 const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-const creditCardRegex = /(\d-?){13,16}/;
-const zipCodeRegex = /(\d-?){5}/;
-const cvvRegex = /(\d-?){3}/;
+const creditCardRegex = /^(\d-?){13,16}$/;
+const zipCodeRegex = /^(\d-?){5}$/;
+const cvvRegex = /^(\d-?){3}$/;
 
 
 var totalCost = 0;
@@ -199,7 +199,7 @@ function checkAvailability(event) {
 paymentDropdown.value = 'credit card';
 
 // Disables the "Select Payment Method" option
-paymentDropdown[0].setAttribute('disabled',true);
+paymentDropdown[0].setAttribute('disabled', true);
 
 // Removes paypal and bitcoin divs
 paypal.remove();
@@ -226,31 +226,92 @@ paymentDropdown.addEventListener("input", e => {
     }
 });
 
-// Submit Button Validations
+const creditCardFields = document.querySelectorAll('#credit-card input');
+
+// Validations
 submitButton.addEventListener("click", e => {
     if (nameInput.value == '') {
-        console.warn('Please Enter Your Name');
+        showError(nameInput.previousElementSibling, true);
         e.preventDefault();
     }
 
     if (!emailRegex.test(mailInput.value)) {
-        console.warn('Please Enter A Valid Email');
+        showError(mailInput.previousElementSibling, true);
         e.preventDefault;
     }
 
     if (document.querySelectorAll('.activities input:checked').length == 0) {
-        console.warn('Please Select At Least 1 Activity');
+        showError(document.querySelector('.activities legend'), true);
         e.preventDefault();
     }
 
     if (paymentDropdown.value === 'credit card') {
-        const creditCardFields = document.querySelectorAll('#credit-card input');
-        if (!creditCardRegex.test(creditCardFields[0].value) || !zipCodeRegex.test(creditCardFields[1].value) || !cvvRegex.test(creditCardFields[2].value)) {
-            console.warn('Please Verify your credit card information');
+        if (!creditCardRegex.test(creditCardFields[0].value)) {
+            showError(creditCardFields[0].previousElementSibling, true);
+            e.preventDefault();
+        }
+        if (!zipCodeRegex.test(creditCardFields[1].value)) {
+            showError(creditCardFields[1].previousElementSibling, true);
+            e.preventDefault();
+        }
+        if (!cvvRegex.test(creditCardFields[2].value)) {
+            showError(creditCardFields[2].previousElementSibling, true);
             e.preventDefault();
         }
     }
 });
+
+nameInput.addEventListener("keydown", e => {
+    if (e.target.value != '') {
+        showError(nameInput.previousElementSibling, false);
+    }
+});
+mailInput.addEventListener("keydown", e => {
+    if (emailRegex.test(e.target.value)) {
+        showError(mailInput.previousElementSibling, false);
+    }
+});
+activities[0].addEventListener("input", e => {
+    if (e.target.length != 0) {
+        showError(document.querySelector('.activities legend'), false);
+    }
+});
+
+creditCardFields.forEach(cc => cc.addEventListener("keyup", e => {
+    switch (e.target.name) {
+        case 'user-cc-num':
+            if (creditCardRegex.test(e.target.value)) {
+                showError(e.target.previousElementSibling, false);
+            }
+            break;
+        case 'user-zip':
+            if (zipCodeRegex.test(e.target.value)) {
+                showError(e.target.previousElementSibling, false);
+            }
+            break;
+        case 'user-cvv':
+            if (cvvRegex.test(e.target.value)) {
+                showError(e.target.previousElementSibling, false);
+            }
+            break;
+        default:
+            break;
+    }
+}));
+
+
+function showError(element, show) {
+    if (show) {
+        if (!element.classList.contains('error')) {
+            element.className = 'error';
+        }
+    } else {
+        if (element.classList.contains('error')) {
+            element.classList.remove('error');
+        }
+    }
+}
+
 
 function createElement(element) {
     const ele = document.createElement(element.element);
