@@ -11,11 +11,20 @@ const colorSelect = document.getElementById('color');
 // Activities Selectors
 const activities = document.querySelectorAll('.activities input');
 
-// Payment Info Selector
+// Payment Info Selectors
 const paymentDropdown = document.getElementById('payment');
 const creditCard = document.getElementById('credit-card');
 const paypal = document.getElementById('paypal');
 const bitcoin = document.getElementById('bitcoin');
+
+// Submit Button Selector
+const submitButton = document.querySelector("button[type='submit']");
+
+// Regular Expressions
+const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const creditCardRegex = /(\d-?){13,16}/;
+const zipCodeRegex = /(\d-?){5}/;
+const cvvRegex = /(\d-?){3}/;
 
 
 var totalCost = 0;
@@ -217,6 +226,31 @@ paymentDropdown.addEventListener("input", e => {
     }
 });
 
+// Submit Button Validations
+submitButton.addEventListener("click", e => {
+    if (nameInput.value == '') {
+        console.warn('Please Enter Your Name');
+        e.preventDefault();
+    }
+
+    if (!emailRegex.test(mailInput.value)) {
+        console.warn('Please Enter A Valid Email');
+        e.preventDefault;
+    }
+
+    if (document.querySelectorAll('.activities input:checked').length == 0) {
+        console.warn('Please Select At Least 1 Activity');
+        e.preventDefault();
+    }
+
+    if (paymentDropdown.value === 'credit card') {
+        const creditCardFields = document.querySelectorAll('#credit-card input');
+        if (!creditCardRegex.test(creditCardFields[0].value) || !zipCodeRegex.test(creditCardFields[1].value) || !cvvRegex.test(creditCardFields[2].value)) {
+            console.warn('Please Verify your credit card information');
+            e.preventDefault();
+        }
+    }
+});
 
 function createElement(element) {
     const ele = document.createElement(element.element);
