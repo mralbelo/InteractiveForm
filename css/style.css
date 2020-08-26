@@ -225,3 +225,7 @@ option {
 	border-color: red !important;
 	background: #ffeded;
 }
+.error-message {
+	margin: 5px 0;
+	color: red;
+}

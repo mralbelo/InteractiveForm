@@ -2,6 +2,7 @@
 const nameInput = document.getElementById('name');
 const mailInput = document.getElementById('mail');
 const titleInput = document.getElementById('title');
+const otherTitle = document.getElementById('other-title');
 
 // T-Shirt Info Selectors
 const sizeSelect = document.getElementById('size');
@@ -30,22 +31,14 @@ const cvvRegex = /^(\d-?){3}$/;
 var totalCost = 0;
 
 nameInput.focus();
+otherTitle.remove();
 
 titleInput.addEventListener("input", e => {
     if (e.target.value == 'other') {
-
-        const otherElement = {
-            element: 'input',
-            attr: [
-                { key: 'id', value: 'other-title' },
-                { key: 'placeholder', value: 'Your Job Role' }
-            ]
-        };
-
-        const otherTitle = createElement(otherElement);
-
         titleInput.parentNode.insertBefore(otherTitle, titleInput.nextElementSibling);
         document.getElementById('other-title').focus();
+    } else {
+        otherTitle.remove();
     }
 });
 
@@ -231,12 +224,12 @@ const creditCardFields = document.querySelectorAll('#credit-card input');
 // Validations
 submitButton.addEventListener("click", e => {
     if (nameInput.value == '') {
-        showError(nameInput.previousElementSibling, true);
+        showError(nameInput.previousElementSibling, true, 'Please enter your name');
         e.preventDefault();
     }
 
     if (!emailRegex.test(mailInput.value)) {
-        showError(mailInput.previousElementSibling, true);
+        showError(mailInput.previousElementSibling, true, 'Please enter a valid email');
         e.preventDefault;
     }
 
@@ -247,7 +240,11 @@ submitButton.addEventListener("click", e => {
 
     if (paymentDropdown.value === 'credit card') {
         if (!creditCardRegex.test(creditCardFields[0].value)) {
-            showError(creditCardFields[0].previousElementSibling, true);
+            var ccErr = 'Please enter a credit card number';
+            if(creditCardFields[0].value.length < 13 && creditCardFields[0].value.length != 0 || creditCardFields[0].value.length > 16){
+                ccErr = 'Please enter a number that is between 13 and 16 digits long';
+            }
+            showError(creditCardFields[0].previousElementSibling, true, ccErr);
             e.preventDefault();
         }
         if (!zipCodeRegex.test(creditCardFields[1].value)) {
@@ -282,6 +279,12 @@ creditCardFields.forEach(cc => cc.addEventListener("keyup", e => {
         case 'user-cc-num':
             if (creditCardRegex.test(e.target.value)) {
                 showError(e.target.previousElementSibling, false);
+            } else {
+                var ccErr = 'Please enter a credit card number';
+                if(e.target.value.length > 16){
+                    ccErr = 'Please enter a number that is between 13 and 16 digits long';
+                    showError(e.target.previousElementSibling, true, ccErr);
+                }
             }
             break;
         case 'user-zip':
@@ -300,14 +303,29 @@ creditCardFields.forEach(cc => cc.addEventListener("keyup", e => {
 }));
 
 
-function showError(element, show) {
+function showError(element, show, errorMessage) {
     if (show) {
         if (!element.classList.contains('error')) {
             element.className = 'error';
+            if (errorMessage) {
+                error = {
+                    element: 'div',
+                    attr: [
+                        {key: 'class', value: 'error-message'}
+                    ],
+                    content: errorMessage
+                }
+                const err = createElement(error);
+                element.parentNode.insertBefore(err, element.nextElementSibling.nextElementSibling);
+            }
         }
     } else {
         if (element.classList.contains('error')) {
             element.classList.remove('error');
+            const errorElement = element.nextElementSibling.nextElementSibling;
+            if (errorElement.className == 'error-message') {
+                errorElement.remove();
+            }
         }
     }
 }
