@@ -11,6 +11,12 @@ const colorSelect = document.getElementById('color');
 // Activities Selectors
 const activities = document.querySelectorAll('.activities input');
 
+// Payment Info Selector
+const paymentDropdown = document.getElementById('payment');
+const creditCard = document.getElementById('credit-card');
+const paypal = document.getElementById('paypal');
+const bitcoin = document.getElementById('bitcoin');
+
 
 var totalCost = 0;
 
@@ -180,36 +186,30 @@ function checkAvailability(event) {
 
 }
 
+// Sets Initial Paymente Method to Credit Card
+paymentDropdown.value = 'credit card';
 
-// NEED REFACTORING
-const paymentSelect = document.getElementById('payment');
-paymentSelect[0].setAttribute('disabled',true);
-const creditCardDiv = paymentSelect.nextElementSibling;
-creditCardDiv.remove();
-const paypalDiv = paymentSelect.nextElementSibling;
-paypalDiv.remove();
-const bitcoinDiv = paymentSelect.nextElementSibling;
-bitcoinDiv.remove();
+// Disables the "Select Payment Method" option
+paymentDropdown[0].setAttribute('disabled',true);
 
-paymentSelect.value = 'credit card';
-paymentSelect.parentNode.append(creditCardDiv);
+// Removes paypal and bitcoin divs
+paypal.remove();
+bitcoin.remove();
 
-
-paymentSelect.addEventListener("input", e => {
-
-    creditCardDiv.remove();
-    paypalDiv.remove();
-    bitcoinDiv.remove();
-
+// Listens for Payment Dropdown and changes the payment option according to the selection
+paymentDropdown.addEventListener("input", e => {
+    creditCard.remove();
+    paypal.remove();
+    bitcoin.remove();
     switch (e.target.value) {
         case 'credit card':
-            paymentSelect.parentNode.append(creditCardDiv);
+            paymentDropdown.parentNode.append(creditCard);
             break
         case 'paypal':
-            paymentSelect.parentNode.append(paypalDiv);
+            paymentDropdown.parentNode.append(paypal);
             break;
         case 'bitcoin':
-            paymentSelect.parentNode.append(bitcoinDiv);
+            paymentDropdown.parentNode.append(bitcoin);
             break;
         default:
             break;
