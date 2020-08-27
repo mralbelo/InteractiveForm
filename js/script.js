@@ -8,6 +8,7 @@ const otherTitle = document.getElementById('other-title');
 const sizeSelect = document.getElementById('size');
 const designSelect = document.getElementById('design');
 const colorSelect = document.getElementById('color');
+const shirtColors = document.getElementById('shirt-colors');
 
 // Activities Selectors
 const activities = document.querySelectorAll('.activities input');
@@ -17,6 +18,7 @@ const paymentDropdown = document.getElementById('payment');
 const creditCard = document.getElementById('credit-card');
 const paypal = document.getElementById('paypal');
 const bitcoin = document.getElementById('bitcoin');
+const creditCardFields = document.querySelectorAll('#credit-card input');
 
 // Submit Button Selector
 const submitButton = document.querySelector("button[type='submit']");
@@ -27,12 +29,11 @@ const creditCardRegex = /^(\d-?){13,16}$/;
 const zipCodeRegex = /^(\d-?){5}$/;
 const cvvRegex = /^(\d-?){3}$/;
 
-
 var totalCost = 0;
+var themes = { jsPuns: [], iLovePuns: [] };
+activitiesList = [];
 
-nameInput.focus();
-otherTitle.remove();
-
+// Listens for Job Role value and display's "Job Role" input when Other is selected
 titleInput.addEventListener("input", e => {
     if (e.target.value == 'other') {
         titleInput.parentNode.insertBefore(otherTitle, titleInput.nextElementSibling);
@@ -42,31 +43,27 @@ titleInput.addEventListener("input", e => {
     }
 });
 
-// Stores Colors divided by theme
-var themes = {
-    jsPuns: [],
-    iLovePuns: []
-};
-for (let i = 0; i < (colorSelect.options.length); i++) {
-    var colorOption = colorSelect[i];
-    const color = { value: colorOption.value, text: colorOption.text };
-    if (colorOption.text.toUpperCase().indexOf('JS Puns'.toUpperCase()) > -1) {
-        themes.jsPuns.push(color);
-    } else {
-        themes.iLovePuns.push(color);
-    }
+// Indexed Shirt Colors divided by theme
+function indexShirtColors() {
+    for (let i = 0; i < (colorSelect.options.length); i++) {
+        var colorOption = colorSelect[i];
+        const color = { value: colorOption.value, text: colorOption.text };
+        if (colorOption.text.toUpperCase().indexOf('JS Puns'.toUpperCase()) > -1) {
+            themes.jsPuns.push(color);
+        } else {
+            themes.iLovePuns.push(color);
+        }
+    }    
 }
-
-// Hides Color Data by Default
-showColorData(0);
 
 // This function will show or hide de Color options based on the param
 function showColorData(state) {
     // 0 = hide, 1 = JsPuns, 2 = iLovePuns
     optionsLength = colorSelect.options.length;
-
+    
     switch (state) {
         case 2:
+            designSelect.parentNode.parentNode.appendChild(shirtColors);
             for (let i = optionsLength; i >= 0; i--) {
                 colorSelect.options.remove(optionsLength);
                 optionsLength -= 1;
@@ -84,6 +81,8 @@ function showColorData(state) {
             }
             break;
         case 1:
+            designSelect.parentNode.parentNode.appendChild(shirtColors);
+            // shirtColors.remove();
             for (let i = optionsLength; i >= 0; i--) {
                 colorSelect.options.remove(optionsLength);
                 optionsLength -= 1;
@@ -101,6 +100,7 @@ function showColorData(state) {
             }
             break;
         default:
+            shirtColors.remove();
             for (let i = optionsLength; i >= 0; i--) {
                 colorSelect.options.remove(optionsLength);
                 optionsLength -= 1;
@@ -126,9 +126,7 @@ designSelect.addEventListener("input", e => {
     }
 });
 
-
-activitiesList = [];
-indexActivities();
+// Indexed Activities
 function indexActivities() {
     for (i = 0; i < activities.length; i++) {
         const dataCost = activities[i].getAttribute('data-cost');
@@ -141,14 +139,15 @@ function indexActivities() {
 // Add an event listener to each input and adds the function checkAvailability
 activities.forEach(activities => activities.addEventListener("input", e => { checkAvailability(e); }));
 
+// Updates Activities Availability and Total Cost
 function checkAvailability(event) {
-    const dataCost = +event.target.getAttribute('data-cost');
     const name = event.target.getAttribute('name');
     const date = event.target.getAttribute('data-day-and-time');
 
     showTotal();
     updateActivities(event.target.checked);
 
+    // Calculates Selected Event Total
     function showTotal() {
         totalCost = 0;
         const parent = activities[0].parentNode.parentNode;
@@ -169,6 +168,7 @@ function checkAvailability(event) {
 
     }
 
+    // Disables Events that conflicts with users selections
     function updateActivities(checked) {
         if (date) {
             for (let i = 0; i < activitiesList.length; i++) {
@@ -194,10 +194,6 @@ paymentDropdown.value = 'credit card';
 // Disables the "Select Payment Method" option
 paymentDropdown[0].setAttribute('disabled', true);
 
-// Removes paypal and bitcoin divs
-paypal.remove();
-bitcoin.remove();
-
 // Listens for Payment Dropdown and changes the payment option according to the selection
 paymentDropdown.addEventListener("input", e => {
     creditCard.remove();
@@ -219,61 +215,64 @@ paymentDropdown.addEventListener("input", e => {
     }
 });
 
-const creditCardFields = document.querySelectorAll('#credit-card input');
-
-// Validations
+// Submit Validation
 submitButton.addEventListener("click", e => {
     if (nameInput.value == '') {
-        showError(nameInput.previousElementSibling, true, 'Please enter your name');
         e.preventDefault();
+        showError(nameInput.previousElementSibling, true, 'Please enter your name');
     }
 
     if (!emailRegex.test(mailInput.value)) {
+        e.preventDefault();
         showError(mailInput.previousElementSibling, true, 'Please enter a valid email');
-        e.preventDefault;
     }
 
     if (document.querySelectorAll('.activities input:checked').length == 0) {
-        showError(document.querySelector('.activities legend'), true);
         e.preventDefault();
+        showError(document.querySelector('.activities legend'), true);
     }
 
     if (paymentDropdown.value === 'credit card') {
         if (!creditCardRegex.test(creditCardFields[0].value)) {
+            e.preventDefault();
             var ccErr = 'Please enter a credit card number';
             if(creditCardFields[0].value.length < 13 && creditCardFields[0].value.length != 0 || creditCardFields[0].value.length > 16){
                 ccErr = 'Please enter a number that is between 13 and 16 digits long';
             }
             showError(creditCardFields[0].previousElementSibling, true, ccErr);
-            e.preventDefault();
         }
         if (!zipCodeRegex.test(creditCardFields[1].value)) {
-            showError(creditCardFields[1].previousElementSibling, true);
             e.preventDefault();
+            showError(creditCardFields[1].previousElementSibling, true, 'Please enter a valid Zip Code');
         }
         if (!cvvRegex.test(creditCardFields[2].value)) {
-            showError(creditCardFields[2].previousElementSibling, true);
             e.preventDefault();
+            showError(creditCardFields[2].previousElementSibling, true, 'Please enter a valid CVV');
         }
     }
 });
 
+//  Name "Real Time" validation
 nameInput.addEventListener("keydown", e => {
     if (e.target.value != '') {
         showError(nameInput.previousElementSibling, false);
     }
 });
+//  Email "Real Time" validation
 mailInput.addEventListener("keydown", e => {
     if (emailRegex.test(e.target.value)) {
         showError(mailInput.previousElementSibling, false);
+    } else {
+        showError(mailInput.previousElementSibling, true, 'Please Provide a valid email');
     }
 });
-activities[0].addEventListener("input", e => {
+//  Activities "Real Time" validation
+activities.forEach(act => act.addEventListener("input", e => {
     if (e.target.length != 0) {
         showError(document.querySelector('.activities legend'), false);
     }
-});
-
+}));
+//  Credit Card "Real Time" validation
 creditCardFields.forEach(cc => cc.addEventListener("keyup", e => {
     switch (e.target.name) {
         case 'user-cc-num':
@@ -302,7 +301,7 @@ creditCardFields.forEach(cc => cc.addEventListener("keyup", e => {
     }
 }));
 
-
+// This function adds error message and classes to the element passed
 function showError(element, show, errorMessage) {
     if (show) {
         if (!element.classList.contains('error')) {
@@ -330,7 +329,7 @@ function showError(element, show, errorMessage) {
     }
 }
 
-
+// This function return a new element based on the object passed to it
 function createElement(element) {
     const ele = document.createElement(element.element);
     if (element.attr) {
@@ -343,3 +342,18 @@ function createElement(element) {
     }
     return ele;
 }
+
+
+// Initializes Curson on Name Input
+nameInput.focus();
+// Hides Other Title
+otherTitle.remove();
+// Indexes Shirt Colors
+indexShirtColors();
+// Hides Color Data by Default
+showColorData(0);
+// Indexes Activities
+indexActivities();
+// Removes paypal and bitcoin divs
+paypal.remove();
+bitcoin.remove();
