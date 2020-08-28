@@ -214,3 +214,18 @@ option {
 		clear: both;
 	}
 }
+
+/* Custom Classes */
+.error {
+	color: red !important;
+	border-color: red !important;
+}
+.error+input {
+	color: red !important;
+	border-color: red !important;
+	background: #ffeded;
+}
+.error-message {
+	margin: 5px 0;
+	color: red;
+}
